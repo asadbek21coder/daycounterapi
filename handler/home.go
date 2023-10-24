@@ -11,6 +11,10 @@ type TemplateData struct {
 }
 
 func GetHomeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	target := time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
 	remain := int(target.Sub(time.Now()).Hours() / 24)
 	w.Header().Set("Content-Type", "application/json")
