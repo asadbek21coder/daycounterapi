@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"html/template"
+	"encoding/json"
 	"net/http"
 	"time"
 )
@@ -13,20 +13,15 @@ type TemplateData struct {
 func GetHomeHandler(w http.ResponseWriter, r *http.Request) {
 	target := time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
 	remain := int(target.Sub(time.Now()).Hours() / 24)
-
-	data := TemplateData{DaysRemaining: remain}
-
-	tmpl, err := template.ParseFiles("templates/index.html")
-
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if remain < 0 {
+		json.NewEncoder(w).Encode(map[string]string{"msg": "expired date"})
 		return
 	}
-
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	if remain == 0 {
+		json.NewEncoder(w).Encode(map[string]string{"msg": "today"})
 		return
 	}
-
+	json.NewEncoder(w).Encode(map[string]int{"days_remain": remain})
 }
